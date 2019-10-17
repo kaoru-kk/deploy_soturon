@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ProstaSoturon</title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag  'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= include_gon %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body>
+    <header>
+        <div class="container">
+        <div class="nav navbar-nav navbar-left">
+        <h4 class="header_greet">こんにちは<%= @header %>さん</h4>
+      </div>
+
+        <nav class="nav navbar-nav navbar-right">
+          <ul>
+            <% if user_signed_in? %>
+                  <li><%= link_to "ユーザ詳細画面へ", user_path(current_user.id),class:'glyphicon glyphicon-user'%></li>
+                  <li><%= link_to "投稿する", new_post_path,class:'glyphicon glyphicon-book' %></li>
+                  <li><%= link_to "投稿一覧", posts_path,class:'glyphicon glyphicon-pencil' %></li>
+                  <li><%= link_to "グラフ", timers_path,class:'glyphicon glyphicon-stats' %></li>
+            <% else %>
+                  <li><%= link_to "ログイン画面", new_user_session_path,class:'glyphicon glyphicon-user' %></li>
+                  <li><%= link_to "会員登録画面", new_user_registration_path,class:'glyphicon glyphicon-user' %></li>
+            <% end %>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+<% if alert %>
+  <p class="alert alert-error"><%= alert %></p>
+<% end %>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+  .navbar-right li {
+    padding-top: 15px;
+    margin:0 0 20px 20px;
+    float: left;
+    list-style: none;
+  }
+
+.header_greet {
+  margin-left: 10px;
+}
+.glyphicon {
+  color: black;
+  font-size: 20px;
+  font-weight: 100;
+}
+
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/moment@latest/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
+
+
+    <%= yield %>
+  </body>
+</html>
+

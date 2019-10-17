@@ -1,0 +1,155 @@
+<% if @post.errors.any? %>
+    <div id="error_explanation">
+
+    <h2><%= @post.errors.count %>errors prohibited this obj from being saved:</h2>
+    <ul>
+        <% @post.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+        <% end %>
+    </ul>
+    </div>
+<% end %>
+<div class="page_all">
+    <div class="post_form">
+        <div class="margin">
+            <%= form_for @post do |m| %>
+
+                <p>タイトル:　<%= m.text_field :title %></p><br>
+
+                <p>内容:　　　　<%= m.text_area :body %></p><br>
+
+                <p>言語名:<%= m.collection_select :language_id, Language.all, :id, :lang_name %></p><br>
+
+                <p><%= m.file_field :images, multiple: true %></p>
+
+                <p><%= m.submit %></p>
+            <% end %>
+        </div>
+    </div>
+    <div class="mark_ex">
+            <div class="title_ex">見やすい投稿の作り方</div><br>
+        <div class="one_content">
+            <div class="mark_content"># 見出し1</div>
+            <div class="midashi1"">見出し１</div>
+        </div>
+        <div class="one_content">
+            <div class="mark_content">## 見出し2</div>
+            <div class="midashi2">見出し２</div>
+        </div>
+        <div class="one_content">
+            <div class="mark_content">~取り消し線~</div>
+            <div class="torikeshi">取り消し線</div>
+        </div>
+        <div class="one_content">
+            <div class="mark_content">```文章をバッククォーテーション３つで囲む```</div>
+            <div class="border">文章が枠線で囲まれます</div>
+        </div>
+        <div class="one_content">
+            <div class="mark_content">`文章をバッククォーテーション1つで囲む`</div>
+            <div class="border_red">文章が強調表示されます</div>
+        </div>
+        <div class="one_content">
+            <div class="mark_content">*アスタリスク1つで囲む*</div>
+            <div class="italic">文字が斜めになります</div>
+        </div>
+        <div class="one_content">
+            <div class="mark_content">***アスタリスク３つで囲む***</div>
+            <div class="bold">文字が濃くなります</div>
+        </div>
+        <div class="one_content">
+            <div class="mark_content">***アスタリスク３つ記述すると水平線が引けます</div>
+            <div class="line"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error_explanation{
+    margin-bottom:30px;
+}
+.page_all{
+    margin:50px 5% 0 10%;
+}
+.post_form {
+    border-right:2px solid grey;
+    height:600px;
+    margin:30px 0 0 0;
+    padding-right:5%;
+    float:left;
+}
+#post_title{
+    width:400px;
+
+}
+#post_body{
+    width:400px;
+    height:400px;
+}
+.margin{
+    text-align: center;
+}
+input[type="file"]{
+    display: inline-block;
+}
+.mark_ex{
+    padding-left: 90px;
+    width: 500px;
+    text-align:center;
+    margin:0 auto;
+    display: inline-block;
+    font-size:18px;
+}
+.title_ex{
+    margin-top:10px;
+    padding:3px;
+    font-size:23px;
+    font-weight:bold;
+    border:2px solid white;
+    background-color:skyblue;
+}
+.mark_content{
+    margin-bottom:8px;
+}
+.one_content{
+    margin-bottom: 20px;
+}
+.midashi1{
+    font-size:27px;
+    font-weight:bold;
+}
+.midashi2{
+    font-size:22px;
+    font-weight:bold;
+}
+.torikeshi{
+    text-decoration:line-through;
+}
+.border{
+    background-color: #dcdcdc;
+    border:1px solid black;
+    width:200px;
+    margin: 0 auto;
+}
+.border_red{
+    margin: 0 auto;
+    color: #c7254e;
+    background-color:#f9f2f4;
+    width:200px;
+}
+.italic{
+    font-style:italic;
+}
+.bold {
+    font-weight:bold;
+}
+.line{
+    border-top:1px solid grey;
+}
+
+
+
+</style>
+
+<script>
+
+</script>

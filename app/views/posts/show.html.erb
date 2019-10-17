@@ -1,0 +1,44 @@
+<div class="show_all">
+    <div class="user_name">ユーザ名：<%= @post.user.name %></div>
+    <div class="created_at">最終更新日:<%= @post.updated_at %></div>
+
+    <div class="lang_name">言語名：<%= @post.language.lang_name %></div>
+
+    <div class="post_title"><%= markdown(@post.title) %></div>
+
+
+        <% if @post.images.attached? %>
+            <% @post.images.each do |image| %>
+                <p><%= image_tag image, size:"200x200" %></p>
+            <% end %>
+        <% end %>
+    <div class="post_body">
+        <p><%= markdown(@post.body).html_safe  %></p>
+    </div>
+
+    <%= link_to "一覧に戻る", posts_path %>
+    <% if @post.user_id == current_user.id %>
+        | <%= link_to "編集する", edit_post_path %> | <%= link_to "投稿の削除", post_path(@post), method: :delete, data: {confirm: "投稿を削除しますか？"} %> 
+    <% end %>
+</div>
+
+
+
+<style>
+
+.show_all{
+    width:1024px;
+    
+    margin: 30px auto;
+}
+.post_body{
+    
+}
+.post_title{
+    
+}
+.lang_name{
+    width:150px;
+    border: solid 1px #dcdcdc;
+    background-color: #dcdcdc;
+}

@@ -1,0 +1,135 @@
+
+<div class="month_select">
+    <%= form_tag(timers_path, :method => "get") do  %>
+        <%= select_tag(:month,options_for_select( [["1月", 1],["2月", 2],["3月", 3],["4月", 4],["5月", 5],["6月", 6],["7月", 7],["8月", 8],["9月", 9],["10月", 10],["11月", 11],["12月", 12]]), id:"month_search") %>
+        <%= hidden_field_tag :sdt %>
+        <%= hidden_field_tag :dt %>
+        <%= submit_tag "送信", id:"month_submit"%>
+    <% end %>
+</div>
+
+<div class="graph">
+    <div class="month_total">
+        <h4 style="text-align:center;"><%= @first_page %></h4>
+        <h4 style="text-align:center;"><%= @month_time %></h4>
+        <h4 style="text-align:center;">現在の総勉強時間: <%= @hour_total %>時間<%= @min_total %>分<%= @sec_total %>秒です</h4>
+    </div>
+    <canvas id="chartBox"></canvas>
+    <%= link_to "手動で時間を入力したい場合はこちらへ", new_timer_path, class:"link_timer" %></li>
+</div>
+
+
+<script>
+$(document).on("click", "#month_submit", function(){
+    var month_num = $("#month_search").val();
+    const year = 2019;
+
+    var zmonth = (Number(month_num)-1);
+    var start_day = new Date(year, zmonth);
+
+    var month = (Number(month_num));
+    var end_day = new Date(year, month, 0);
+
+    $("#sdt").val(start_day);
+    $("#dt").val(end_day);
+})
+        $(document).ready(function() {
+            new Chart(document.getElementById("chartBox"), {
+            type: 'bar',
+            data: {
+                datasets: [{
+                    data: gon.alltime,
+                    label: "",
+                    borderWidth: 2,
+                    borderColor: "#3e95cd",
+                    fill: false,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                    type: 'time',
+                    time: {
+                        parser: 'YYYY-MM-DD',
+                        unit: "day",
+                        displayFormats: {
+                        day: 'M月D日'
+                        },
+                        min: gon.start_day,
+                        max: gon.end_day
+                    },
+                    ticks: {
+                        source: 'data'
+                    },
+                    title: {
+                        display: true,
+                        text: "１ヶ月の勉強時間"
+                    }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            suggestedMax: 24,
+                            suggestedMin: 0,
+                            stepSize: 3
+                        }
+                    }]
+                },
+                legend: {
+                    display: false
+                },
+                animation: {
+                    duration: 10,
+                },
+                hover: {
+                    animationDuration: 0,
+                },
+                responsiveAnimationDuration: 0
+            },
+            plugins: [{
+                beforeInit: function(chart) {
+                    var time = chart.options.scales.xAxes[0].time, // 'time' object reference
+                    timeDiff = moment(time.max).diff(moment(time.min), 'd'); // difference (in days) between min and max date
+                    for (i = 0; i <= timeDiff; i++) {
+                        var _label = moment(time.min).add(i, 'd').format('YYYY-MM-DD HH:mm:ss');
+                        chart.data.labels.push(_label);
+                    }
+                }
+            }]
+            });
+        });
+</script>
+
+
+<style >
+#month_submit {
+    width: 60px;
+    height: 30px;
+}
+#month_search{
+    width: 70px;
+    height: 30px;
+}
+.month_select{
+    margin:20px;
+    text-align:center;
+}
+.graph{
+    width:700px;
+    height:600px;
+    margin:50px auto 0 auto;
+}
+.time-total{
+    display:inline-block;
+    margin:0 auto;
+}
+.month_total{
+    margin: 30px auto;
+    padding:20px;
+    border: 1px solid black;
+    width:450px;
+}
+.link_timer{
+    margin: 0 0 40px 430px;
+}
+</style>

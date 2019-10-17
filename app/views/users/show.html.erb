@@ -1,0 +1,356 @@
+<%= flash[:notice] %>
+
+<div class="user_show">
+  <div class="container">
+      <div class="col-lg-3">
+
+        <div class="user_info">
+          <div class="user_content">
+            <% if @user.image.attached? %>
+                <p><%= image_tag @user.image, size:"70x70" %></p>
+            <% else %>
+                <p><%= image_tag "no_image.png", size:"70x70" %></p>
+            <% end %>
+            <p><%= @user.name %></p>
+            <%= link_to "プロフ詳細画面", edit_user_path(@user) %>
+          </div>
+        </div>
+
+        <div class="post_all">
+          <div class="post_content">
+          <h4>投稿の一覧</h4>
+            <div class="post_each">
+              <% @posts.each do |post| %>
+                  ・<%= link_to post_path(post.id) do %><%= post.title %><% end %><br><br>
+              <% end %>
+              <div class="hooder">
+                <div class="paginate"><%= paginate @posts, class:"paginate" %></div>
+                <%= link_to "投稿一覧へ", posts_path %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <div class="col-lg-9">
+      <div class="right">
+        <div class="stopwatch">
+          <div class="timer_content">
+            <div id="clock">00:00:00</div><br>
+        </div>
+
+            <form>
+                <input type="button" id="start" value="Start">
+                <input type="button" id="stop" value="Stop" disabled>
+                <input type="button" id="restart" value="Restart" disabled>
+                <input type="button" id="finish" value="finish" disabled>
+            </form>
+          </div>
+
+        <%= link_to new_post_path do %>
+        <div class="post_new">
+            <div class="post_link">投稿する</div>
+        </div>
+        <% end %>
+      </div>
+
+      <%# グラフ %>
+
+      <div class="graph">
+      <div class = "all_time">
+        <p>今日までの合計!  <%= @hour_total %>時間<%= @min_total %>分<%= @sec_total %>秒勉強しています</p>
+        <div class="no_data"><%= @no_data %>
+        <div><%= @month_time %>
+      </div>
+        <canvas id="chartBox"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+
+$(function () {
+  var sec = 0;
+  var min = 0;
+  var hour = 0;
+
+  var timer;
+
+  // スタート
+  $(document).on("click", "#start",function() {
+    // 00:00:00から開始
+    sec = 0;
+    min = 0;
+    hour = 0;
+    $('#clock').html('00:00:00');
+    timer = setInterval(countup, 1000);
+
+    $(this).prop('disabled', true);
+    $('#stop,#reset,#finish').prop('disabled', false);
+
+    $(document).on("click","#show_a", function(){
+      if(confirm("このページから移動するとタイマーが止まります。遷移しますか？")){
+        return true;
+      } else {
+        return false;
+      }
+    });
+  });
+
+  $(window).on('load', function(){
+      if(document.URL.match("http://localhost:3000/users/")){
+          $('a').attr('id','show_a');
+          sec = 0;
+          hour = 0;
+          min = 0;
+      }
+  });
+  // ストップ
+  $('#stop').click(function() {
+    // 一時停止
+    clearInterval(timer);
+
+    $(this).prop('disabled', true);
+    $('#restart').prop('disabled', false);
+
+  });
+
+  // リスタート
+  $('#restart').click(function() {
+    // 一時停止から再開
+    timer = setInterval(countup, 1000);
+
+    $(this).prop('disabled', true);
+    $('#stop').prop('disabled', false);
+  });
+
+/**
+* カウントアップ
+*/
+  function countup()
+  {
+    sec += 1;
+
+    if (sec > 59) {
+      sec = 0;
+      min += 1;
+    }
+
+    if (min > 59) {
+      min = 0;
+      hour += 1;
+    }
+
+    // 0埋め
+    sec_number = ('0' + sec).slice(-2);
+    min_number = ('0' + min).slice(-2);
+    hour_number = ('0' + hour).slice(-2);
+
+    $('#clock').html(hour_number + ':' +  min_number + ':' + sec_number);
+  }
+});
+
+
+  $(document).on('click', "#finish", function(){
+        var count = $("#clock").text();
+
+        const hour = count.slice(0, 2);
+        const min = count.slice(3, 5);
+        const sec = count.slice(6, 8);
+        $.ajax({
+          url: "http://localhost:3000/timers",
+          type: "POST",
+          datatype :"html",
+          data: {timer: {hour: hour, min: min, sec: sec}}
+        })
+        .done(function(data){
+          hour = 0;
+          min = 0;
+          sec = 0;
+        })
+        .fail(function(){
+          alert("送信に失敗しました")
+        })
+
+  });
+
+
+// graph
+
+
+$(function(){
+    function getFirstDate (date) {
+      return new Date(date.getFullYear(), date.getMonth(), 1);
+    }
+    var sdt = getFirstDate(new Date());
+
+    function getLastDate (date) {
+      return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    }
+    var dt = getLastDate(new Date()); 
+
+    const year = 2019;
+    var month_num = $("#month_search").val();
+
+      $(document).ready(function() {
+            new Chart(document.getElementById("chartBox"), {
+            type: 'bar',
+            data: {
+                datasets: [{
+                    data: gon.array,
+                    label: "",
+                    borderWidth: 2,
+                    borderColor: "#3e95cd",
+                    fill: false,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                    type: 'time',
+                    time: {
+                        parser: 'YYYY-MM-DD',
+                        unit: 'day',
+                        displayFormats: {
+                        day: 'MMM D'
+                        },
+                        min: sdt,
+                        max: dt
+                    },
+                    ticks: {
+                        source: 'data'
+                    }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            suggestedMax: 24,
+                            suggestedMin: 0,
+                            stepSize: 3
+                        }
+                    }]
+                },
+                legend: {
+                    display: false
+                },
+                animation: {
+                    duration: 0,
+                },
+                hover: {
+                    animationDuration: 0,
+                },
+                responsiveAnimationDuration: 0
+            },
+            plugins: [{
+                beforeInit: function(chart) {
+                    var time = chart.options.scales.xAxes[0].time,
+                    timeDiff = moment(time.max).diff(moment(time.min), 'd');
+
+                        for (i = 0; i <= timeDiff; i++) {
+                        var _label = moment(time.min).add(i, 'd').format('YYYY-MM-DD HH:mm:ss');
+                        chart.data.labels.push(_label);
+                    }
+                }
+            }]
+        });
+    });
+})
+</script>
+
+<style>
+.user_show {
+  margin-top:20px;
+}
+/* ユーザ関連 */
+.user_info{
+  border: 2px solid grey;
+  padding: 15px;
+}
+.user_content {
+  text-align: center;
+}
+
+/* post関連 */
+
+.post_all{
+  margin-top: 10px;
+  padding:20px;
+  border:2px solid grey;
+}
+.post_content{
+  text-align:center;
+}
+.post_each{
+  text-align:left;
+}
+
+/* ストップウォッチ関連 */
+.right{
+  margin: 0 10px 0 70px;
+}
+.stopwatch{
+  float:left;
+  margin-top:20px;
+  width: 300px;
+  height:100px;
+  position:relative;
+  background-color: #7fffd4;
+}
+#clock{
+  text-align:center;
+  font-size:25px;
+}
+.timer_content{
+  position:absolute;
+  top: 50%;
+  left: 47%;
+  transform: translateY(-50%) translateX(-50%);
+}
+/* 新規投稿 */
+.post_new{
+  float:left;
+  margin: 20px 0 0 20px;
+  width: 300px;
+  height:100px;
+  position:relative;
+  background-color: #00bfff;
+}
+.post_link{
+  color:white;
+  font-size:25px;
+  top: 40%;
+  left: 35%;
+  position: absolute;
+}
+input[type="button"]{
+  width:45px;
+  height:30px;
+  margin-left:5px;
+}
+form{
+  margin-top:59px;
+  margin-left:40px;
+}
+
+/* graph */
+.graph{
+    width:700px;
+    height:600px;
+    margin:240px auto;
+  padding-right:70px;
+}
+.all_time{
+  text-align:center;
+  font-size: 20px;
+}
+img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+.hooder{
+  text-align:center;
+}
+</style>
